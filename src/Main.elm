@@ -3,27 +3,39 @@ module Main exposing (..)
 import Dict exposing (Dict)
 
 import Browser
+import Platform
+import Time
 
 import HanoiView exposing (Discs, Model, Move(..), Msg(..), view)
 
 
 main =
-  Browser.sandbox { init = init, update = update, view = view }
+  Browser.element
+    { init = init
+    , update = update
+    , view = view
+    , subscriptions = subscriptions
+    }
 
 
-init : Model
-init = 
-  { discs = Dict.fromList 
-      [ (0, [2, 3, 4, 5, 6, 7, 8, 9, 10])
-      , (1, [])
-      , (2, [])
-      ]
-  , moves = solution 9 0 1 2
-  }
+nocmd : Model -> (Model, Cmd Msg)
+nocmd model = (model, Cmd.none)
 
+init : () -> (Model, Cmd Msg)
+init _ = nocmd
+    { discs = Dict.fromList 
+        [ (0, [2, 3, 4, 5, 6, 7, 8, 9, 10])
+        , (1, [])
+        , (2, [])
+        ]
+    , moves = solution 9 0 1 2
+    }
 
-update : Msg -> Model -> Model
-update _ model =
+subscriptions : Model -> Sub Msg
+subscriptions _ = Time.every 500 <| always Tick
+
+update : Msg -> Model -> (Model, Cmd Msg)
+update _ model = nocmd <|
   case model.moves of
     [] -> model
     (m::ms) -> {discs = updateDiscs m model.discs, moves = ms}

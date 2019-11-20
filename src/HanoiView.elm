@@ -22,12 +22,9 @@ view model =
   let pegs = List.map peg [1, 2, 3]
       ds = List.concat <| Dict.values <| Dict.map discs model.discs
   in div []
-    [ div [] [Html.button [onClick Tick] [Html.text "move"]]
-    , div []
-      [ svg
-        [Svg.Attributes.style "width:100%" , height "500"]
-        (pegs ++ ds)
-      ]
+    [ svg
+      [Svg.Attributes.style "width:100%" , height "500"]
+      (pegs ++ ds)
     ]
 
 discs : Int -> List Int -> List (Svg msg)
