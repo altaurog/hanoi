@@ -8,17 +8,22 @@ import Html.Events exposing (onClick)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 
-type alias Model = Dict Int (List Int)
+type alias Discs = Dict Int (List Int)
+type alias Model = 
+  { discs: Discs
+  , moves: List Move
+  }
 
-type Msg
-  = Move Int Int
+type Tick = Tick
+type Move = Move Int Int
+type alias Msg = Tick
 
 view : Model -> Html Msg
 view model =
   let pegs = List.map peg [1, 2, 3]
-      ds = List.concat <| Dict.values <| Dict.map discs model
+      ds = List.concat <| Dict.values <| Dict.map discs model.discs
   in div []
-    [ div [] [Html.button [onClick (Move 0 1)] [Html.text "move"]]
+    [ div [] [Html.button [onClick Tick] [Html.text "move"]]
     , div []
       [ svg
         [Svg.Attributes.style "width:100%" , height "500"]
