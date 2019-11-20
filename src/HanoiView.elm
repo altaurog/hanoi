@@ -14,9 +14,8 @@ type alias Model =
   , moves: List Move
   }
 
-type Tick = Tick
+type Msg = Tick | Solve Int
 type Move = Move Int Int
-type alias Msg = Tick
 
 view : Model -> Html Msg
 view model =

@@ -4,7 +4,7 @@ import Dict exposing (Dict)
 
 import Browser
 
-import HanoiView exposing (Discs, Model, Move(..), Msg, Tick, view)
+import HanoiView exposing (Discs, Model, Move(..), Msg(..), view)
 
 
 main =
@@ -18,11 +18,7 @@ init =
       , (1, [])
       , (2, [])
       ]
-  , moves =
-    [ Move 0 1
-    , Move 0 2
-    , Move 1 2
-    ]
+  , moves = solution 9 0 1 2
   }
 
 
@@ -45,3 +41,13 @@ move f fds t tds =
       Dict.union (Dict.fromList [(f, fds), (t, tds)])
   else
       identity
+
+
+solution : Int -> Int -> Int -> Int -> List Move
+solution n a b c =
+  if n == 0 then []
+  else
+    let
+      toC = solution (n - 1) a c b
+      toB = solution (n - 1) c b a
+    in toC ++ [Move a b] ++ toB
