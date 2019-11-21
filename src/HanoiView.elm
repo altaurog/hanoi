@@ -12,9 +12,11 @@ type alias Discs = Dict Int (List Int)
 type alias Model = 
   { discs: Discs
   , moves: List Move
+  , speed: Float
+  , play: Bool
   }
 
-type Msg = Tick | Solve Int
+type Msg = Tick | PlayPause | Faster | Slower | Reset
 type Move = Move Int Int
 
 view : Model -> Html Msg
@@ -22,9 +24,20 @@ view model =
   let pegs = List.map peg [1, 2, 3]
       ds = List.concat <| Dict.values <| Dict.map discs model.discs
   in div []
-    [ svg
+    [ controls model
+    , svg
       [Svg.Attributes.style "width:100%" , height "500"]
       (pegs ++ ds)
+    ]
+
+controls : Model -> Html Msg
+controls {play} =
+  let label = if play then "Pause" else "Play"
+  in div []
+    [ button [ onClick PlayPause ] [ Html.text label ]
+    , button [ onClick Reset ] [ Html.text "Reset" ]
+    , button [ onClick Slower ] [ Html.text "Slower" ]
+    , button [ onClick Faster ] [ Html.text "Faster" ]
     ]
 
 discs : Int -> List Int -> List (Svg msg)

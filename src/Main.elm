@@ -22,23 +22,35 @@ nocmd : Model -> (Model, Cmd Msg)
 nocmd model = (model, Cmd.none)
 
 init : () -> (Model, Cmd Msg)
-init _ = nocmd
+init _ = nocmd reset
+
+reset : Model
+reset =
     { discs = Dict.fromList 
         [ (0, [2, 3, 4, 5, 6, 7, 8, 9, 10])
         , (1, [])
         , (2, [])
         ]
     , moves = solution 9 0 1 2
+    , speed = 500.0
+    , play = False
     }
 
 subscriptions : Model -> Sub Msg
-subscriptions _ = Time.every 500 <| always Tick
+subscriptions {play, speed} =
+  if play then Time.every speed <| always Tick else Sub.none
 
 update : Msg -> Model -> (Model, Cmd Msg)
-update _ model = nocmd <|
-  case model.moves of
-    [] -> model
-    (m::ms) -> {discs = updateDiscs m model.discs, moves = ms}
+update msg model = nocmd <|
+  case msg of
+    PlayPause -> {model | play = not model.play}
+    Faster -> {model | speed = model.speed * 0.8}
+    Slower -> {model | speed = model.speed * 1.25 }
+    Reset -> reset
+    Tick ->
+      case model.moves of
+        [] -> model
+        (m::ms) -> {model | discs = updateDiscs m model.discs, moves = ms}
 
 updateDiscs : Move -> Discs -> Discs
 updateDiscs (Move f t) discs =
