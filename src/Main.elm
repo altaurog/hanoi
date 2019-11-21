@@ -6,7 +6,7 @@ import Browser
 import Platform
 import Time
 
-import HanoiView exposing (Discs, Model, Move(..), Msg(..), view)
+import HanoiView exposing (Discs, Model, Move(..), Msg(..), view, thickness)
 
 
 main =
@@ -26,12 +26,16 @@ init _ = nocmd <| reset 9
 
 reset : Int -> Model
 reset n =
+  let
+    discs = Dict.fromList 
+      [ (0, List.range 2 (n + 1))
+      , (1, [])
+      , (2, [])
+      ]
+  in
     { num = n
-    , discs = Dict.fromList 
-        [ (0, List.range 2 (n + 1))
-        , (1, [])
-        , (2, [])
-        ]
+    , discs = discs
+    , pos = positions discs
     , moves = solution n 0 1 2
     , speed = 500.0
     , play = False
@@ -52,7 +56,11 @@ update msg model = nocmd <|
     Tick ->
       case model.moves of
         [] -> model
-        (m::ms) -> {model | discs = updateDiscs m model.discs, moves = ms}
+        (m::ms) ->
+          let
+            discs = updateDiscs m model.discs
+            pos = positions discs
+          in {model | discs = discs, pos = pos, moves = ms}
 
 limit : Float -> Float
 limit = clamp 250 1500
@@ -71,6 +79,23 @@ move f fds t tds =
   else
       identity
 
+positions : Discs -> List (Int, Int, Int)
+positions =
+  Dict.map pegPositions
+  >> Dict.values
+  >> List.concat
+  >> List.sort
+
+pegPositions : Int -> List Int -> List (Int, Int, Int)
+pegPositions n = List.reverse >> List.indexedMap (discPos (n + 1))
+
+discPos : Int -> Int -> Int -> (Int, Int, Int)
+discPos npeg h dwidth =
+  let
+    mid = 25 * npeg
+    x = mid - dwidth
+    y = 100 - thickness * (h + 1)
+  in (dwidth, x, y)
 
 solution : Int -> Int -> Int -> Int -> List Move
 solution n a b c =

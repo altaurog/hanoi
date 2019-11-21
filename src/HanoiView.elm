@@ -15,10 +15,13 @@ min = Html.Attributes.min
 max = Html.Attributes.max
 step = Html.Attributes.step
 
+thickness = 3
+
 type alias Discs = Dict Int (List Int)
 type alias Model = 
   { num: Int
   , discs: Discs
+  , pos: List (Int, Int, Int)
   , moves: List Move
   , speed: Float
   , play: Bool
@@ -30,7 +33,7 @@ type Move = Move Int Int
 view : Model -> Html Msg
 view model =
   let pegs = List.map peg [1, 2, 3]
-      ds = List.concat <| Dict.values <| Dict.map discs model.discs
+      ds = List.map disc model.pos
   in div []
     [ controls model
     , svg
@@ -58,26 +61,19 @@ controls {play, num} =
     , button [ onClick Faster ] [ Html.text "Faster" ]
     ]
 
-discs : Int -> List Int -> List (Svg msg)
-discs n = List.reverse >> List.indexedMap (disc (n + 1))
-
-
-disc : Int -> Int -> Int -> Svg msg
-disc n h w =
-  let mid = 25 * n
-      t = 3
-  in rect
-    [ x <| percent (mid - w)
-    , y <| percent (100 - t * (h + 1))
-    , width <| percent (2 * w)
-    , height <| percent t
+disc : (Int, Int, Int) -> Svg msg
+disc (dwidth, x_, y_) =
+  rect
+    [ x <| percent x_
+    , y <| percent y_
+    , width <| percent (2 * dwidth)
+    , height <| percent thickness
     , rx "5"
     , ry "5"
-    , fill <| hsl (w - 1)
+    , fill <| hsl (dwidth - 1)
     , stroke "#454545"
-    , discId w
-    ]
-    []
+    , discId dwidth
+    ] []
 
 discId : Int -> Svg.Attribute msg
 discId =
