@@ -42,8 +42,10 @@ reset n =
     }
 
 subscriptions : Model -> Sub Msg
-subscriptions {play, speed} =
-  if play then Time.every speed <| always Tick else Sub.none
+subscriptions {moves, play, speed} =
+  case moves of
+    [] -> Sub.none
+    _ -> if play then Time.every speed <| always Tick else Sub.none
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model = nocmd <|
