@@ -2,21 +2,29 @@ module HanoiView exposing (..)
 
 import Dict exposing (Dict)
 
-import Html exposing (Html, button, div)
-import Html.Events exposing (onClick)
+import Html exposing (Html, button, div, input)
+import Html.Attributes
+import Html.Events exposing (onClick, onInput)
 
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 
+val = Html.Attributes.value
+typ = Html.Attributes.type_
+min = Html.Attributes.min
+max = Html.Attributes.max
+step = Html.Attributes.step
+
 type alias Discs = Dict Int (List Int)
 type alias Model = 
-  { discs: Discs
+  { num: Int
+  , discs: Discs
   , moves: List Move
   , speed: Float
   , play: Bool
   }
 
-type Msg = Tick | PlayPause | Faster | Slower | Reset
+type Msg = Tick | PlayPause | Faster | Slower | Reset | SetNum Int
 type Move = Move Int Int
 
 view : Model -> Html Msg
@@ -31,10 +39,20 @@ view model =
     ]
 
 controls : Model -> Html Msg
-controls {play} =
-  let label = if play then "Pause" else "Play"
+controls {play, num} =
+  let
+    playpause = if play then "Pause" else "Play"
+    setnum = String.toInt >> Maybe.withDefault num >> SetNum
   in div []
-    [ button [ onClick PlayPause ] [ Html.text label ]
+    [ input
+      [ typ "number"
+      , val (String.fromInt num)
+      , min "2"
+      , max "12"
+      , step "1"
+      , onInput setnum
+      ] []
+    , button [ onClick PlayPause ] [ Html.text playpause ]
     , button [ onClick Reset ] [ Html.text "Reset" ]
     , button [ onClick Slower ] [ Html.text "Slower" ]
     , button [ onClick Faster ] [ Html.text "Faster" ]

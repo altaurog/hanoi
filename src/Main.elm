@@ -22,16 +22,17 @@ nocmd : Model -> (Model, Cmd Msg)
 nocmd model = (model, Cmd.none)
 
 init : () -> (Model, Cmd Msg)
-init _ = nocmd reset
+init _ = nocmd <| reset 9
 
-reset : Model
-reset =
-    { discs = Dict.fromList 
-        [ (0, [2, 3, 4, 5, 6, 7, 8, 9, 10])
+reset : Int -> Model
+reset n =
+    { num = n
+    , discs = Dict.fromList 
+        [ (0, List.range 2 (n + 1))
         , (1, [])
         , (2, [])
         ]
-    , moves = solution 9 0 1 2
+    , moves = solution n 0 1 2
     , speed = 500.0
     , play = False
     }
@@ -43,6 +44,7 @@ subscriptions {play, speed} =
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model = nocmd <|
   case msg of
+    SetNum n -> {model | num = n}
     PlayPause -> {model | play = not model.play}
     Faster -> {model | speed = model.speed * 0.8}
     Slower -> {model | speed = model.speed * 1.25 }
