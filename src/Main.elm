@@ -46,13 +46,16 @@ update msg model = nocmd <|
   case msg of
     SetNum n -> {model | num = n}
     PlayPause -> {model | play = not model.play}
-    Faster -> {model | speed = model.speed * 0.8}
-    Slower -> {model | speed = model.speed * 1.25 }
-    Reset -> reset
+    Faster -> {model | speed = limit <| model.speed * 0.8}
+    Slower -> {model | speed = limit <| model.speed * 1.25 }
+    Reset -> reset model.num
     Tick ->
       case model.moves of
         [] -> model
         (m::ms) -> {model | discs = updateDiscs m model.discs, moves = ms}
+
+limit : Float -> Float
+limit = clamp 250 1500
 
 updateDiscs : Move -> Discs -> Discs
 updateDiscs (Move f t) discs =
