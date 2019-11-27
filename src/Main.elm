@@ -41,7 +41,7 @@ reset n =
     , positions = pos
     , animState = List.map A.style <| List.map posProps pos
     , moves = solution n 0 1 2
-    , speed = 500.0
+    , speed = 780.0
     , play = False
     }
 
