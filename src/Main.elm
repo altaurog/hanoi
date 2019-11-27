@@ -34,20 +34,22 @@ reset n =
       , (1, [])
       , (2, [])
       ]
+    pos = positions pegs
   in
     { num = n
     , pegs = pegs
-    , discPos = List.map A.style <| positions pegs
+    , positions = pos
+    , animState = List.map A.style <| List.map posProps pos
     , moves = solution n 0 1 2
     , speed = 500.0
     , play = False
     }
 
 subscriptions : Model -> Sub Msg
-subscriptions {moves, play, speed, discPos} =
+subscriptions {moves, play, speed, animState} =
   let
-    anim = A.subscription Animate discPos
-    tick = Time.every speed <| always Tick
+    anim = A.subscription Animate animState
+    tick = Time.every speed <| always NextMove
   in case moves of
     [] -> anim
     _ -> if play then Sub.batch [tick, anim] else anim
@@ -61,15 +63,21 @@ update msg model = nocmd <|
     Slower -> {model | speed = limit <| model.speed * 1.25 }
     Reset -> reset model.num
     Animate animMsg ->
-      {model | discPos = List.map (A.update animMsg) model.discPos}
-    Tick ->
+      {model | animState = List.map (A.update animMsg) model.animState}
+    NextMove ->
       case model.moves of
         [] -> model
         (m::ms) ->
           let
             pegs = updateDiscs m model.pegs
-            pos = List.map2 (updatePos model.speed) model.discPos (positions pegs)
-          in {model | pegs = pegs, discPos = pos, moves = ms}
+            pos = positions pegs
+            diff = List.map2 posDiff model.positions pos
+          in { model
+             | pegs = pegs
+             , positions = pos
+             , animState = List.map2 (updatePos model.speed) model.animState diff
+             , moves = ms
+             }
 
 limit : Float -> Float
 limit = clamp 250 1500
@@ -88,18 +96,13 @@ move f fds t tds =
   else
       identity
 
-updatePos : Float -> A.State -> List A.Property -> A.State
-updatePos speed old new =
-  let easing = A.easing {duration = speed * 0.8, ease = identity}
-  in A.queue [A.toWith easing new] old
-
-positions : Discs -> List (List A.Property)
+positions : Discs -> List (Int, Int)
 positions =
   Dict.map pegPositions
   >> Dict.values
   >> List.concat
   >> List.sort
-  >> List.map (Tuple.second >> posProps)
+  >> List.map Tuple.second
 
 pegPositions : Int -> List Int -> List (Int, (Int, Int))
 pegPositions n = List.reverse >> List.indexedMap (discPosition (n + 1))
@@ -112,6 +115,17 @@ discPosition npeg h dwidth =
     y = 100 - thickness * (h + 1)
   in (dwidth, (x, y))
 
+posDiff : (Int, Int) -> (Int, Int) -> Maybe ((Int, Int), (Int, Int))
+posDiff old new =
+  if old == new then Nothing else Just (old, new)
+
+updatePos : Float -> A.State -> Maybe ((Int, Int), (Int, Int)) -> A.State
+updatePos speed animState diff =
+  let
+    easing = A.easing {duration = speed * 0.8, ease = identity}
+  in case diff of
+    Nothing -> animState
+    Just (_, (x, y)) -> A.queue [A.toWith easing (posProps (x, y))] animState
 
 posProps : (Int, Int) -> List A.Property
 posProps (x, y) =

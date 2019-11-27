@@ -35,14 +35,15 @@ type alias Discs = Dict Int (List Int)
 type alias Model = 
   { num: Int
   , pegs: Discs
-  , discPos: List A.State
+  , positions: List (Int, Int)
+  , animState: List A.State
   , moves: List Move
   , speed: Float
   , play: Bool
   }
 
 type Msg
-  = Tick
+  = NextMove
   | Animate A.Msg
   | PlayPause
   | Faster
@@ -54,7 +55,7 @@ type Move = Move Int Int
 view : Model -> Html Msg
 view model =
   let pegs = List.map peg [1, 2, 3]
-      ds = List.indexedMap disc model.discPos
+      ds = List.indexedMap disc model.animState
   in div []
     [ controls model
     , svg
