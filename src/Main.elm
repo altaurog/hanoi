@@ -121,11 +121,30 @@ posDiff old new =
 
 updatePos : Float -> A.State -> Maybe ((Int, Int), (Int, Int)) -> A.State
 updatePos speed animState diff =
-  let
-    easing = A.easing {duration = speed * 0.8, ease = identity}
-  in case diff of
+  case diff of
     Nothing -> animState
-    Just (_, (x, y)) -> A.queue [A.toWith easing (posProps (x, y))] animState
+    Just pd -> A.queue (animSegments speed pd) animState
+
+animSegments : Float -> ((Int, Int), (Int, Int)) -> List A.Step
+animSegments speed ((ox, oy), (nx, ny)) =
+  let
+    ds = fracs [abs nx - ox, oy - 45, ny - 45]
+    eas = List.map (easing speed) ds
+    segments = [(ox, 45), (nx, 45), (nx, ny)]
+  in List.map2 segment eas segments
+
+fracs : List Int -> List Float
+fracs is =
+  let
+    fs = List.map (abs >> toFloat) is
+    total = List.sum fs
+  in List.map (\x -> x / total) fs
+
+easing : Float -> Float -> A.Interpolation
+easing speed d = A.easing {duration = speed * 0.8 * d, ease = identity}
+
+segment : A.Interpolation -> (Int, Int) -> A.Step
+segment e p = A.toWith e (posProps p)
 
 posProps : (Int, Int) -> List A.Property
 posProps (x, y) =

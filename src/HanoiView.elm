@@ -121,9 +121,9 @@ peg n =
       w = 1
   in rect 
     [ x <| percent (mid - w)
-    , y "10%"
+    , y "50%"
     , width <| percent (2 * w)
-    , height "90%"
+    , height "50%"
     , rx "2"
     , ry "2"
     , fill "#eeeeee"
