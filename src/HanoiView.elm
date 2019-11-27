@@ -2,8 +2,8 @@ module HanoiView exposing (..)
 
 import Dict exposing (Dict)
 
-import Html exposing (Html, div, form, input)
-import Html.Attributes
+import Html exposing (Html, div, form, input, label)
+import Html.Attributes as HA
 import Html.Events exposing (onClick, onInput)
 
 import Svg exposing (..)
@@ -11,7 +11,7 @@ import Svg.Attributes exposing (..)
 
 import Animation as A
 
-class = Html.Attributes.class
+class = HA.class
 classes = List.map class
 classDiv c = div (classes c)
 button bc action =
@@ -19,15 +19,10 @@ button bc action =
     class "btn",
     class ("btn-" ++ bc),
     class "navbar-btn",
-    typ "button",
+    HA.type_ "button",
     onClick action
   ]
-role = Html.Attributes.attribute "role"
-val = Html.Attributes.value
-typ = Html.Attributes.type_
-min = Html.Attributes.min
-max = Html.Attributes.max
-step = Html.Attributes.step
+role = HA.attribute "role"
 
 thickness = 3
 
@@ -75,18 +70,21 @@ controls {play, num} =
       , form (classes ["navbar-form", "navbar-left"])
           [ classDiv ["form-group"]
             [ button "primary" PlayPause [ Html.text playpause ]
-            , input
-                [ class "form-control"
-                , typ "number"
-                , val (String.fromInt num)
-                , min "2"
-                , max "12"
-                , step "1"
-                , onInput setnum
-                ] []
             , button "default" Reset [ Html.text "Reset" ]
             , button "default" Slower [ Html.text "Slower" ]
             , button "default" Faster [ Html.text "Faster" ]
+            , label [ HA.for "num-discs" ]
+                [ Html.text "Number of discs:" ]
+            , input
+                [ class "form-control"
+                , HA.id "num-discs"
+                , HA.type_ "number"
+                , HA.value (String.fromInt num)
+                , HA.min "2"
+                , HA.max "12"
+                , HA.step "1"
+                , onInput setnum
+                ] []
             ]
           ]
         ]

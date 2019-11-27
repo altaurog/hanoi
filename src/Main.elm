@@ -57,7 +57,7 @@ subscriptions {moves, play, speed, animState} =
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model = nocmd <|
   case msg of
-    SetNum n -> {model | num = n}
+    SetNum n -> reset n
     PlayPause -> {model | play = not model.play}
     Faster -> {model | speed = limit <| model.speed * 0.8}
     Slower -> {model | speed = limit <| model.speed * 1.25 }
